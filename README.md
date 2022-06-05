@@ -47,3 +47,33 @@ Request header sample for this API:
 	token: da96b638852b05fe49a2368fd140538a
 	Cache-Control: no-cache
 	Postman-Token: c8b788df-119d-1356-5ecd-eb176d938e8e
+
+<b>Sample API responses:</b>
+
+	{
+    	"status": "success",
+    	"message": "Order can be proceed",
+    	"total_cost": 400,
+    	"eta": "2022-06-06 09:23:29"
+	}
+
+<hr>
+
+	{
+    	"status": "reject",
+    	"message": "Unable to deliver before deadline"
+	}
+
+<hr>
+
+	{
+    	"status": "reject",
+    	"message": "Deadline have exceeded"
+	}
+
+<hr>
+
+	{
+    	"status": "reject",
+    	"message": "Out of pigeon's range"
+	}

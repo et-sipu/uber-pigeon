@@ -43,7 +43,8 @@ class UberPigeonController extends Controller
      */
     private function speed(){
         $eta = $this->data['distance'] / $this->data['speed'];
-        $period = Carbon::now()->diffInHours(Carbon::parse($this->data['deadline']),false);
+        $period = (Carbon::now()->diffInMinutes(Carbon::parse($this->data['deadline']),false))/60;
+        $this->eta = Carbon::now()->addHour($eta)->toDateTimeString();
         
         if($period >= $eta){
             return $this;
@@ -101,7 +102,9 @@ class UberPigeonController extends Controller
     private function result(){
         $response = [
             "status" => "success",
-            "total_cost" => $this->totalCost
+            "message" => "Order can be proceed",
+            "total_cost" => $this->totalCost,
+            "eta" => $this->eta
         ];
 
         return response()->json($response);
