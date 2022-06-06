@@ -6,24 +6,57 @@ use App\Http\Controllers\Controller;
 use App\Models\Pigeons;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Exception;
 
 class UberPigeonController extends Controller
 {
     /**
-     * Check order's availability, and subsequently its cost.
+     * Checks all pigeon's availability
      */
     public function checkOrder(Request $request){
-        $this->data = $this->standardizeData($request);
+        $pigeons = Pigeons::all();
+
+        foreach($pigeons as $key => $pigeon){
+            $data = $this->check($request,$pigeon);
+            if($data['status'] == 'available'){
+                $result[$key] = $data;
+            }
+        }
+
+        if(isset($result)){
+            return [
+                "status" => "success",
+                "message"=> "Pigeon are available to proceed this order",
+                "data" => array_values($result)
+            ];
+        }else{
+            return [
+                "status" => "reject",
+                "message" => "Non of the pigeons are available to execute the order"
+            ];
+        }
+    }
+
+    /**
+     * Check order's availability, and subsequently its cost.
+     */
+    private function check($request,$pigeon){
+        $this->pigeon = $pigeon->name;
+        $this->data = $this->standardizeData($request,$pigeon);
 
         /**
          * Any future expansions require to create/add new method below
-         */
-        return $this
-        ->downtime()
-        ->range()
-        ->speed()
-        ->cost()
-        ->result();
+        */
+        try {
+            return $this
+                    ->downtime()
+                    ->range()
+                    ->speed()
+                    ->cost()
+                    ->result();
+        }catch(Exception $e) {
+            return $this->reject($e->getMessage());
+        }
     }
 
     /**
@@ -33,8 +66,7 @@ class UberPigeonController extends Controller
         if($this->data['range'] >= $this->data['distance']){
             return $this;
         }else{
-            $message = "Out of pigeon's range";
-            exit($this->reject($message));
+            throw new Exception("Out of pigeon's range");
         }
     }
 
@@ -44,16 +76,14 @@ class UberPigeonController extends Controller
     private function speed(){
         $eta = $this->data['distance'] / $this->data['speed'];
         $period = (Carbon::now()->diffInMinutes(Carbon::parse($this->data['deadline']),false))/60;
-        $this->eta = Carbon::now()->addHour($eta)->toDateTimeString();
+        $this->eta = Carbon::now()->addMinutes($eta*60)->toDateTimeString();
         
         if($period >= $eta){
             return $this;
         }elseif($period < 0){
-            $message = "Deadline have exceeded";
-            exit($this->reject($message));
+            throw new Exception("Deadline have exceeded");
         }else{
-            $message = "Unable to deliver before deadline";
-            exit($this->reject($message));
+            throw new Exception("Unable to deliver before deadline");
         }
     }
 
@@ -88,12 +118,11 @@ class UberPigeonController extends Controller
      */
     private function reject($message){
         $response = [
-            "status" => "reject",
+            "status" => "unavailable",
             "message" => $message
         ];
 
-        header('Content-Type : application/json; charset=UTF-8');
-        return json_encode($response);
+        return $response;
     }
 
     /**
@@ -101,21 +130,20 @@ class UberPigeonController extends Controller
      */
     private function result(){
         $response = [
-            "status" => "success",
-            "message" => "Order can be proceed",
+            "status" => "available",
+            "pigeon" => $this->pigeon,
             "total_cost" => $this->totalCost,
             "eta" => $this->eta
         ];
 
-        return response()->json($response);
+        return $response;
     }
 
     /**
      * Compile all data into an array
      * Any new fields need to be added here
      */
-    private function standardizeData($request){
-        $pigeon = Pigeons::getPigeon($request->pigeon);
+    private function standardizeData($request,$pigeon){
 
         $data = [
             "latest_delivery_at" => $pigeon->latest_delivery_at,

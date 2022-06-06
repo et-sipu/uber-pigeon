@@ -15,4 +15,4 @@ use App\Http\Controllers\API\UberPigeonController;
 |
 */
 
-Route::get('/checkOrder/distance/{distance}/deadline/{deadline}/pigeon/{pigeon}', [UberPigeonController::class, 'checkOrder']);
+Route::get('/checkOrder/distance/{distance}/deadline/{deadline}', [UberPigeonController::class, 'checkOrder']);
