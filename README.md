@@ -51,29 +51,27 @@ Request header sample for this API:
 <b>Sample API responses:</b>
 
 	{
-    	"status": "success",
-    	"message": "Order can be proceed",
-    	"total_cost": 400,
-    	"eta": "2022-06-06 09:23:29"
+		"status": "success",
+		"message": "Pigeon are available to proceed this order",
+		"data": [
+			{
+				"status": "available",
+				"pigeon": "Carillo",
+				"total_cost": 1400,
+				"eta": "2022-06-07 08:59:01"
+			},
+			{
+				"status": "available",
+				"pigeon": "Alejandro",
+				"total_cost": 1400,
+				"eta": "2022-06-07 08:13:01"
+			}
+		]
 	}
 
 <hr>
 
 	{
-    	"status": "reject",
-    	"message": "Unable to deliver before deadline"
-	}
-
-<hr>
-
-	{
-    	"status": "reject",
-    	"message": "Deadline have exceeded"
-	}
-
-<hr>
-
-	{
-    	"status": "reject",
-    	"message": "Out of pigeon's range"
+		"status": "reject",
+		"message": "Non of the pigeons are available to execute the order"
 	}
